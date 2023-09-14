@@ -68,6 +68,7 @@ public class TaskController {
             try {
                 txtContent = convertEpubToTxt(file);
             } catch (Exception e) {
+                log.error("exxxxxxxxxxxxxxxxxxxx");
                 throw new RuntimeException(e);
             }
             //log.info("convert finish "+txtContent);
@@ -84,10 +85,7 @@ public class TaskController {
             task.setIsDelete(0);
         boolean saveResult = taskService.save(task);
 
-
         String finalTxtContent = txtContent;
-
-
 
         CompletableFuture.runAsync(() -> {
             Task updateTask = new Task();
@@ -102,7 +100,7 @@ public class TaskController {
 
             String result = null;
             try {
-                result = aiXunFeiManager.TextToAudio(finalTxtContent);
+                result = aiXunFeiManager.TextToAudio(finalTxtContent, name);
                 System.out.println("generate result" + result);
             } catch (IOException e) {
                 throw new RuntimeException(e);

@@ -1,8 +1,10 @@
 package edu.vt.codewaveservice.common;
 
-import java.io.Serializable;
+import lombok.Data;
 
-public class BaseResponse<T> implements Serializable {
+import java.io.Serializable;
+@Data
+public class BaseResponse<T> {
 
     private int code;
 

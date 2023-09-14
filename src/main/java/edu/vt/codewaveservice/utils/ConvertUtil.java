@@ -1,5 +1,6 @@
 package edu.vt.codewaveservice.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.SpineReference;
@@ -8,8 +9,9 @@ import org.jsoup.Jsoup;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
-
+@Slf4j
 public class ConvertUtil {
+
     public static String convertEpubToTxt(MultipartFile file) throws Exception {
         Book book = (new EpubReader()).readEpub(file.getInputStream());
         StringBuilder txtContent = new StringBuilder();
