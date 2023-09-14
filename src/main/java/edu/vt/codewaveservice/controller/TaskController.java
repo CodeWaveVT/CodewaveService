@@ -68,7 +68,6 @@ public class TaskController {
             try {
                 txtContent = convertEpubToTxt(file);
             } catch (Exception e) {
-                log.error("exxxxxxxxxxxxxxxxxxxx");
                 throw new RuntimeException(e);
             }
             //log.info("convert finish "+txtContent);
