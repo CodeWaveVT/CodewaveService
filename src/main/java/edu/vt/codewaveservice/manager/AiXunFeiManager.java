@@ -1,19 +1,34 @@
 package edu.vt.codewaveservice.manager;
 
 import com.alibaba.excel.util.StringUtils;
+import edu.vt.codewaveservice.utils.TextToMP3;
 import edu.vt.codewaveservice.utils.XunFeiUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Base64;
 
 @Slf4j
 @Service
 public class AiXunFeiManager {
+
+    private static final String INPUT_FILE_PATH = "src/main/resources/text/test_book.txt";
+
+    public String TextToAudioMultiPart(String text,String fileName) throws IOException {
+        if (!StringUtils.isNotBlank(text)) {
+            return "empty text";
+        }
+
+        text = text.replaceAll("\\&[a-zA-Z]{1,10};", "").replaceAll("<[^>]*>", "").replaceAll("[(/>)<]", "").trim();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(INPUT_FILE_PATH))) {
+            writer.write(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        TextToMP3.generateMultiPartMp3();
+        return "audioByte";
+    }
 
     public String TextToAudio(String text,String fileName) throws IOException {
         if (!StringUtils.isNotBlank(text)) {
@@ -38,5 +53,7 @@ public class AiXunFeiManager {
 
         return "audioByte";
     }
+
+
 
 }

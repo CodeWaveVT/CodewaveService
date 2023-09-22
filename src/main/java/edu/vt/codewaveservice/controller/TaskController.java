@@ -99,7 +99,7 @@ public class TaskController {
 
             String result = null;
             try {
-                result = aiXunFeiManager.TextToAudio(finalTxtContent, name);
+                result = aiXunFeiManager.TextToAudioMultiPart(finalTxtContent, name);
                 System.out.println("generate result" + result);
             } catch (IOException e) {
                 throw new RuntimeException(e);
