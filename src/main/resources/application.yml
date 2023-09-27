@@ -67,3 +67,11 @@ xunfei:
   apiKey: b492175e9919700929dca6b5e0f7dace
   hostUrl: https://tts-api.xfyun.cn/v2/tts
 
+aws:
+  s3:
+    accessKey: AKIAW5FQIIYG3VWIELWC
+    secretKey: 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
+    region: us-east-1
+    bucket: codewaveaudio
+
+

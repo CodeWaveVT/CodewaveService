@@ -3,7 +3,8 @@ package edu.vt.codewaveservice.common;
 public enum ErrorCode {
     SUCCESS(0, "ok"),
     PARAMS_ERROR(40000, "wrong request param 请求参数错误"),
-    NOT_LOGIN_ERROR(40100, "need login 未登录"),
+    USER_EXIST_ERROR(40001, "user already exist 用户已存在"),
+    NOT_LOGIN_ERROR(40100, "need login 需要登录"),
     NO_AUTH_ERROR(40101, "no permission 无权限"),
     NOT_FOUND_ERROR(40400, "request data not found 请求数据不存在"),
     TOO_MANY_REQUEST(42900, "too much request 请求过于频繁"),
