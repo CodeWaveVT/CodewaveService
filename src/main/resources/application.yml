@@ -1,6 +1,4 @@
-openai:
-  apikey : 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
-  openai: https://api.openai.com/v1/engines/davinci/completions
+
 spring:
   application:
     name: codewave-backend
@@ -22,6 +20,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/codewavedb
+#    url: 6b7fcf0bb568.c.methodot.com:30546/codewavedb
     username: root
     password: root
   # Redis ??
@@ -30,11 +29,11 @@ spring:
     multipart:
       # ????
       max-file-size: 10MB
-  rabbitmq:
-    host: localhost
-    port: 5672
-    password: guest
-    username: guest
+#  rabbitmq:
+#    host: localhost
+#    port: 5672
+#    password: guest
+#    username: guest
 
   redis:
     database: 1
@@ -61,17 +60,6 @@ mybatis-plus:
       logic-delete-value: 1 # ?????????? 1?
       logic-not-delete-value: 0 # ?????????? 0?
 
-xunfei:
-  appid: dec60e28
-  apiSecret: MzMzMGFkYjI2MzAyMjk2MjUzMTRhOTRl
-  apiKey: b492175e9919700929dca6b5e0f7dace
-  hostUrl: https://tts-api.xfyun.cn/v2/tts
 
-aws:
-  s3:
-    accessKey: AKIAW5FQIIYG3VWIELWC
-    secretKey: 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
-    region: us-east-1
-    bucket: codewaveaudio
 
 
