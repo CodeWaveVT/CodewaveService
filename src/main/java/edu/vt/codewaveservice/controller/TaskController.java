@@ -10,6 +10,7 @@ import edu.vt.codewaveservice.model.dto.GenAudioBookRequest;
 import edu.vt.codewaveservice.model.entity.Task;
 import edu.vt.codewaveservice.model.entity.User;
 import edu.vt.codewaveservice.model.vo.TaskResponse;
+import edu.vt.codewaveservice.model.vo.TaskVo;
 import edu.vt.codewaveservice.service.TaskService;
 import edu.vt.codewaveservice.service.UserService;
 import edu.vt.codewaveservice.utils.TaskIdUtil;
@@ -26,6 +27,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -124,6 +127,24 @@ public class TaskController {
         TaskResponse response = new TaskResponse();
         response.setGenId("-1");
         return ResultUtils.success(response);
+    }
+
+    @PostMapping("/list/completed")
+    public BaseResponse<List<TaskVo>> getCompletedTaskList(HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        Long userId = loginUser.getId();
+        Map<String, List<TaskVo>> taskList = taskService.getTaskById(userId);
+        List<TaskVo> successTasks = taskList.get("successTasks");
+        return ResultUtils.success(successTasks);
+    }
+
+    @PostMapping("/list/processing")
+    public BaseResponse<List<TaskVo>> getProcessingTaskList(HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        Long userId = loginUser.getId();
+        Map<String, List<TaskVo>> taskList = taskService.getTaskById(userId);
+        List<TaskVo> otherTasks = taskList.get("otherTasks");
+        return ResultUtils.success(otherTasks);
     }
 
     private void handleChartUpdateError(long taskId, String execMessage) {

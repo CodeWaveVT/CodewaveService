@@ -1,6 +1,7 @@
 package edu.vt.codewaveservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.vt.codewaveservice.common.BaseResponse;
 import edu.vt.codewaveservice.common.ErrorCode;
@@ -104,6 +105,58 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         log.info("register success, userAccount:{}", userAccount);
 
         return ResultUtils.success("register success");
+    }
+
+    @Override
+    public BaseResponse forgetPassword(UserRegisterRequest userRegisterRequest, HttpSession session) {
+        String userAccount = userRegisterRequest.getUserAccount();
+        String userPassword = userRegisterRequest.getUserPassword();
+        String checkPassword = userRegisterRequest.getCheckPassword();
+        String validateCode = userRegisterRequest.getValidateCode();
+
+        if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword,validateCode)){
+            log.info("userAccount:{} userPassword:{} checkPassword:{} validateCode:{} is null", userAccount,userPassword,checkPassword,validateCode);
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR.getCode(),"userAccount or userPassword or checkPassword or validateCode is null");
+        }
+
+        if(!userPassword.equals(checkPassword)){
+            log.info("userPassword:{} is not equal checkPassword:{}", userPassword,checkPassword);
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR.getCode(),"userPassword is not equal checkPassword");
+        }
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userAccount",userAccount);
+        long count = userMapper.selectCount(queryWrapper);
+
+        if(count<=0){
+            log.info("userAccount:{} not exist", userAccount);
+            return ResultUtils.error(ErrorCode.NOT_FOUND_ERROR,"userAccount not exist,please register");
+        }
+
+        Object cacheCode = session.getAttribute(userAccount);
+        log.info("validatecode:{},cacheCode{}", validateCode, cacheCode);
+        if (cacheCode == null || !cacheCode.toString().equals(validateCode)) {
+            //4. 不一致则报错
+            log.info("validateCode is not equal cacheCode");
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR.getCode(),"validateCode is not equal cacheCode");
+        }
+
+        String encryptpassword = DigestUtils.md5DigestAsHex((USER_PASSWORD_SALT+userPassword).getBytes());
+
+        User user = new User();
+        user.setUserPassword(encryptpassword);
+
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("userAccount", userAccount);
+
+        int save = userMapper.update(user, updateWrapper);
+
+        if(save!=1){
+            return ResultUtils.error(ErrorCode.OPERATION_ERROR,"save user error");
+        }
+        log.info("reset password success, userAccount:{}", userAccount);
+
+        return ResultUtils.success("reset password success");
     }
 
     @Override

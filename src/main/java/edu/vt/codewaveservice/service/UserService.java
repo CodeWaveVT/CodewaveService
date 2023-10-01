@@ -5,9 +5,11 @@ import edu.vt.codewaveservice.model.dto.UserLoginRequest;
 import edu.vt.codewaveservice.model.dto.UserRegisterRequest;
 import edu.vt.codewaveservice.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.vt.codewaveservice.model.vo.TaskVo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
 * @author yukun
@@ -20,14 +22,13 @@ public interface UserService extends IService<User> {
 
     BaseResponse userRegister(UserRegisterRequest userRegisterRequest, HttpSession session);
 
+    BaseResponse forgetPassword(UserRegisterRequest userRegisterRequest, HttpSession session);
+
     BaseResponse sendValidateCode(String userAccount, HttpSession session);
 
-    /**
-     *
-     * @return
-     */
     BaseResponse doLogin(UserLoginRequest loginRequest, HttpServletRequest httpServletRequest);
 
     BaseResponse doLogout(HttpServletRequest httpServletRequest);
+
 
 }
