@@ -113,7 +113,7 @@ public class XunFeiUtil {
             public void onMessage(WebSocket webSocket, String text) {
                 super.onMessage(webSocket, text);
                 //处理返回数据
-                //System.out.println("receive=>");
+                System.out.println("receive data=>");
                 ResponseData resp = null;
                 try {
                     resp = json.fromJson(text, ResponseData.class);
@@ -134,7 +134,7 @@ public class XunFeiUtil {
                             String is = base64Concat(list);
                             base64 = is;
                             lock = false;
-                            webSocket.close(1000, "");
+                            webSocket.close(100, "");
                         }
                     }
                 }

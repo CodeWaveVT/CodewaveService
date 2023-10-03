@@ -31,7 +31,7 @@ public class ConvertController {
                 System.out.println("finish !!!!!!"+txtContent);
 
                 Task task = new Task();
-                task.setId(0L);
+                task.setId("0L");
                 task.setEbookname("testbook");
                 task.setBookType("epub");
                 task.setEbookTextData(txtContent);

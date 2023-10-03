@@ -33,6 +33,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static edu.vt.codewaveservice.utils.ConvertUtil.convertEpubToTxt;
+import static java.lang.Thread.sleep;
 
 @RestController
 @RequestMapping("/task")
@@ -77,9 +78,10 @@ public class TaskController {
             System.out.println(txtContent);
 
             Task task = new Task();
-            task.setId(0L);
             task.setEbookname(name);
+            task.setId(TaskIdUtil.generateTaskID());
             task.setBookType(type);
+            task.setStatus("waiting");
             task.setEbookTextData(txtContent);
             task.setUserId(-1L);
             task.setCreateTime(new Date());
@@ -93,20 +95,24 @@ public class TaskController {
             Task updateTask = new Task();
             updateTask.setId(task.getId());
             updateTask.setStatus("running");
+            System.out.println(updateTask);
 
             boolean b = taskService.updateById(updateTask);
+
             if (!b) {
                 handleChartUpdateError(task.getId(), "update task running status failed");
                 return;
             }
 
-            String result = null;
+            String result = "generated url";
             try {
                 result = aiXunFeiManager.TextToAudioMultiPart(finalTxtContent, name);
-                System.out.println("generate result" + result);
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            System.out.println("generate result :" + result);
+
 
             if (result.length() == 0) {
                 handleChartUpdateError(task.getId(), "AI gen error");
@@ -114,18 +120,21 @@ public class TaskController {
             }
 
             Task finishTask = new Task();
-            updateTask.setId(task.getId());
-            updateTask.setStatus("success");
-            updateTask.setGenAudioUrl(result);
+            finishTask.setId(task.getId());
+            finishTask.setStatus("success");
+            finishTask.setGenAudioUrl(result);
 
             boolean updateResult = taskService.updateById(finishTask);
+
+            System.out.println("update result :" );
+
             if (!updateResult) {
                 handleChartUpdateError(task.getId(), "update task finish status failed");
             }
         }, threadPoolExecutor);
 
         TaskResponse response = new TaskResponse();
-        response.setGenId("-1");
+        response.setGenId(task.getId());
         return ResultUtils.success(response);
     }
 
@@ -147,7 +156,7 @@ public class TaskController {
         return ResultUtils.success(otherTasks);
     }
 
-    private void handleChartUpdateError(long taskId, String execMessage) {
+    private void handleChartUpdateError(String taskId, String execMessage) {
         Task updateTask = new Task();
         updateTask.setId(taskId);
         updateTask.setStatus("failed");

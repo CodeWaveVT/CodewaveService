@@ -7,115 +7,83 @@ import com.google.common.io.Files;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
+import static edu.vt.codewaveservice.utils.SystemConstants.WORDS_PER_FILE;
+
 public class TextToMP3 {
-    @Resource
-    private static XunFeiUtil xunFeiUtil;
-    private static final int WORDS_PER_FILE = 50;
-    private static final String INPUT_FILE_PATH = "src/main/resources/text/test_book.txt";
-    private static final String OUTPUT_FILE_PATH = "src/main/resources/tts/final_output.mp3";
-    public static String getName(String input) {
-        if (input == null) {
-            return "**********";
-        }
 
-        if (input.length() >= 10) {
-            return input.substring(0, 10);
-        } else {
-            int numberOfAsterisks = 10 - input.length();
-            StringBuilder result = new StringBuilder(input);
-            for (int i = 0; i < numberOfAsterisks; i++) {
-                result.append("*");
-            }
-            return result.toString();
-        }
-    }
+    private TempFileManager tempFileManager;
 
+    private S3Utils s3Utils;
 
-    public static void generateMultiPartMp3(){
-        List<String> subTexts = splitTextFile(INPUT_FILE_PATH);
-        for (int i = 0; i < subTexts.size(); i++) {
-            System.out.println(String.format("======text file part %s =======",i));
-            System.out.println(subTexts.get(i));
-        }
-        List<File> mp3Files = new ArrayList<>();
-        t2a t2a = new t2a();
-        for (int i=0;i<subTexts.size();i++) {
-            String subText = subTexts.get(i);
-            String taskName = getName(subText)+String.format("part%s.mp3",i);
-            try {
-                t2a.textToAudio(subText,taskName);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            String path = t2a.OUTPUT_PATH+taskName;
-            mp3Files.add(new File(path));
-            // waitForFileToExist(path);
-        }
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        mergeMP3Files(mp3Files, OUTPUT_FILE_PATH);
+    public TextToMP3() {
+        tempFileManager = new TempFileManager();
+        s3Utils = new S3Utils();
     }
 
     public static void main(String[] args) throws IOException {
-        List<String> subTexts = splitTextFile(INPUT_FILE_PATH);
-        for (int i = 0; i < subTexts.size(); i++) {
-            System.out.println(String.format("======text file part %s =======",i));
-            System.out.println(subTexts.get(i));
-        }
-        List<File> mp3Files = new ArrayList<>();
-        t2a t2a = new t2a();
-        for (int i=0;i<subTexts.size();i++) {
-            String subText = subTexts.get(i);
-            String taskName = getName(subText)+String.format("part%s.mp3",i);
-            t2a.textToAudio(subText,taskName);
-            String path = t2a.OUTPUT_PATH+taskName;
-            mp3Files.add(new File(path));
-           // waitForFileToExist(path);
-        }
+        TextToMP3 textToMP3 = new TextToMP3();
+        String inputFilePath = "src/main/resources/text/test_book.txt";
+        String outputFilePath = textToMP3.generateMultiPartMp3(inputFilePath);
+        //textToMP3.textToAudio("hello world", "test.mp3");
+//        String s3Url = textToMP3.uploadAndCleanUp(outputFilePath);  // 上传文件并清除临时文件
+//        System.out.println("Uploaded MP3 URL: " + s3Url);
+    }
 
+    public String uploadAndCleanUp(String outputFilePath) {
+        String fileName = new File(outputFilePath).getName();
+        String s3Url = s3Utils.uploadFile(outputFilePath, fileName);  // 上传文件到S3
+        tempFileManager.deleteAllTempFiles();  // 清除所有临时文件
+        return s3Url;
+    }
+
+    public void textToAudio(String text, String taskName) throws IOException {
+        String path = SystemConstants.TTS_PATH + taskName;
+        String result = "";
         try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            text = text.replaceAll("\\&[a-zA-Z]{1,10};", "").replaceAll("<[^>]*>", "").replaceAll("[(/>)<]", "").trim();
+            result = XunFeiUtil.convertText(text);  // Assuming XunFeiUtil is accessible
+        } catch (Exception e) {
+            e.printStackTrace();  // Replacing log.error for simplicity
         }
-
-        mergeMP3Files(mp3Files, OUTPUT_FILE_PATH);
+        byte[] audioByte = Base64.getDecoder().decode(result);
+        try (OutputStream outputStream = new FileOutputStream(path)) {
+            outputStream.write(audioByte);
+        }
     }
 
-    private static void waitForFileToExist(String filePath) {
-        File file = new File(filePath);
-        int maxAttempts = 12; // 尝试12次，总等待时间为60秒
-        int attempts = 0;
+    public String generateMultiPartMp3(String inputFilePath) {
+        List<String> subTexts = splitTextFile(inputFilePath);
 
-        while (!file.exists() && attempts < maxAttempts) {
+        List<File> mp3Files = new ArrayList<>();
+        for (int i = 0; i < subTexts.size(); i++) {
+            String subText = subTexts.get(i);
+            System.out.println("Subtext " + i + ": " + subText);
+            String taskName = String.format("part%s.mp3", i);
             try {
-                Thread.sleep(5000); // 等待5秒
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                textToAudio(subText, taskName);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            attempts++;
+            String path = SystemConstants.TTS_PATH + taskName;
+            mp3Files.add(tempFileManager.createTempFile(path));  // Creating temp files using TempFileManager
         }
 
-        if (attempts == maxAttempts) {
-            // 文件未在预期时间内生成，您可以在此处添加错误处理逻辑
-            System.out.println("Error: AI generated MP3 file not found after waiting for 60 seconds.");
-        }
+        String outputFileName = new File(inputFilePath).getName().replace(".txt", ".mp3");
+        String outputFilePath = SystemConstants.TTS_PATH + outputFileName;
+        mergeMP3Files(mp3Files, outputFilePath);
+        //tempFileManager.createTempFile(outputFilePath);  // Registering the final output file as a temp file
+        tempFileManager.deleteAllTempFiles();
+        return outputFilePath;
     }
 
-    public static List<String> splitTextFile(String filePath) {
+
+    public List<String> splitTextFile(String filePath) {
         List<String> subTexts = new ArrayList<>();
         try {
             String content = Files.asCharSource(new File(filePath), Charsets.UTF_8).read();
@@ -142,7 +110,7 @@ public class TextToMP3 {
         return subTexts;
     }
 
-    public static void mergeMP3Files(List<File> mp3Files, String outputFilePath) {
+    public void mergeMP3Files(List<File> mp3Files, String outputFilePath) {
         try (FileOutputStream fos = new FileOutputStream(outputFilePath)) {
             for (File mp3File : mp3Files) {
                 try (FileInputStream fis = new FileInputStream(mp3File)) {
