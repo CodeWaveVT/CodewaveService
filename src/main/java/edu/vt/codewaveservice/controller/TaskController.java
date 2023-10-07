@@ -11,9 +11,13 @@ import edu.vt.codewaveservice.model.entity.Task;
 import edu.vt.codewaveservice.model.entity.User;
 import edu.vt.codewaveservice.model.vo.TaskResponse;
 import edu.vt.codewaveservice.model.vo.TaskVo;
+import edu.vt.codewaveservice.processor.ConverterProcessorFactory;
+import edu.vt.codewaveservice.processor.ProcessingContext;
+import edu.vt.codewaveservice.processor.TextToAudioChain;
 import edu.vt.codewaveservice.service.TaskService;
 import edu.vt.codewaveservice.service.UserService;
 import edu.vt.codewaveservice.utils.TaskIdUtil;
+import edu.vt.codewaveservice.utils.TempFileManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,28 +72,27 @@ public class TaskController {
 //        redisLimitManager.doRateLimit("getChartById_"+loginUser.getId());
 
             // Convert the EPUB file to TXT
-            String txtContent = null;
-            try {
-                txtContent = convertEpubToTxt(file);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            //log.info("convert finish "+txtContent);
-            System.out.println(txtContent);
+//            String txtContent = null;
+//            try {
+//                txtContent = convertEpubToTxt(file);
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//            //log.info("convert finish "+txtContent);
+//            System.out.println(txtContent);
 
             Task task = new Task();
             task.setEbookname(name);
             task.setId(TaskIdUtil.generateTaskID());
             task.setBookType(type);
             task.setStatus("waiting");
-            task.setEbookTextData(txtContent);
-            task.setUserId(-1L);
-            task.setCreateTime(new Date());
-            task.setUpdateTime(new Date());
-            task.setIsDelete(0);
+//            task.setEbookTextData(txtContent);
+//            task.setUserId(-1L);
+//            task.setCreateTime(new Date());
+//            task.setUpdateTime(new Date());
+//            task.setIsDelete(0);
         boolean saveResult = taskService.save(task);
 
-        String finalTxtContent = txtContent;
 
         CompletableFuture.runAsync(() -> {
             Task updateTask = new Task();
@@ -105,14 +108,20 @@ public class TaskController {
             }
 
             String result = "generated url";
+            TextToAudioChain chain = new TextToAudioChain();
+            ProcessingContext context = new ProcessingContext();
+            context.setFile(file);
+            context.setTempFileManager(new TempFileManager());
+            String s3Url = null;
             try {
-                result = aiXunFeiManager.TextToAudioMultiPart(finalTxtContent, name);
-
-            } catch (IOException e) {
+                String fileType = new ConverterProcessorFactory().getFileExtension(context.getFile().getOriginalFilename());
+                System.out.println(fileType);
+                s3Url = chain.process(context);
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            result = s3Url;
             System.out.println("generate result :" + result);
-
 
             if (result.length() == 0) {
                 handleChartUpdateError(task.getId(), "AI gen error");

@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 
-import static edu.vt.codewaveservice.utils.ConvertUtil.convertEpubToTxt;
+import static edu.vt.codewaveservice.utils.ConvertUtil.readPdfContent;
 
 @RestController
 public class ConvertController {
@@ -27,22 +27,22 @@ public class ConvertController {
             if (!file.isEmpty()) {
                 // Convert the EPUB file to TXT
 
-                String txtContent = convertEpubToTxt(file);
+                String txtContent = readPdfContent(file);
                 System.out.println("finish !!!!!!"+txtContent);
 
-                Task task = new Task();
-                task.setId("0L");
-                task.setEbookname("testbook");
-                task.setBookType("epub");
-                task.setEbookTextData(txtContent);
-                task.setGenAudioUrl("");
-                task.setStatus("");
-                task.setExecMessage("");
-                task.setUserId(-1L);
-                task.setCreateTime(new Date());
-                task.setUpdateTime(new Date());
-                task.setIsDelete(0);
-                taskService.save(task);
+//                Task task = new Task();
+//                task.setId("0L");
+//                task.setEbookname("testbook");
+//                task.setBookType("epub");
+//                task.setEbookTextData(txtContent);
+//                task.setGenAudioUrl("");
+//                task.setStatus("");
+//                task.setExecMessage("");
+//                task.setUserId(-1L);
+//                task.setCreateTime(new Date());
+//                task.setUpdateTime(new Date());
+//                task.setIsDelete(0);
+//                taskService.save(task);
 
                 // Here you can save the TXT content to a file or return it directly
                 return new ResponseEntity<>(txtContent, HttpStatus.OK);

@@ -57,14 +57,24 @@ public class TextToMP3 {
         }
     }
 
+    private static String extractPart(String filePath) {
+        int startIdx = filePath.lastIndexOf("/") + 1;
+        int endIdx = filePath.lastIndexOf(".");
+        if (startIdx != -1 && endIdx != -1 && startIdx < endIdx) {
+            return filePath.substring(startIdx, endIdx);
+        } else {
+            throw new IllegalArgumentException("Invalid file path format");
+        }
+    }
+
     public String generateMultiPartMp3(String inputFilePath) {
         List<String> subTexts = splitTextFile(inputFilePath);
-
+        String extracName = extractPart(inputFilePath);
         List<File> mp3Files = new ArrayList<>();
         for (int i = 0; i < subTexts.size(); i++) {
             String subText = subTexts.get(i);
             System.out.println("Subtext " + i + ": " + subText);
-            String taskName = String.format("part%s.mp3", i);
+            String taskName = extracName+String.format("part%s.mp3", i);
             try {
                 textToAudio(subText, taskName);
             } catch (IOException e) {
