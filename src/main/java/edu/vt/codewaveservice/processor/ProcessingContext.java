@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class ProcessingContext {
 
-    private MultipartFile file;
+    private byte[] file;
     private String text;
     private String bookName;
     private String fileName;
@@ -17,4 +17,5 @@ public class ProcessingContext {
     private List<File> mp3Files;
     private String finalMp3Path;
     private TempFileManager tempFileManager;
+    private String fileType;
 }
