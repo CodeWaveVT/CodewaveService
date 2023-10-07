@@ -14,7 +14,7 @@ import edu.vt.codewaveservice.processor.ProcessingContext;
 import edu.vt.codewaveservice.processor.Processor;
 import edu.vt.codewaveservice.processor.ProcessorException;
 import edu.vt.codewaveservice.processor.TextToAudioChain;
-import edu.vt.codewaveservice.processor.impl.CriticalProcessor;
+import edu.vt.codewaveservice.processor.CriticalProcessor;
 import edu.vt.codewaveservice.service.TaskService;
 import edu.vt.codewaveservice.service.UserService;
 import edu.vt.codewaveservice.utils.TaskIdUtil;

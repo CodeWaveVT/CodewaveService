@@ -1,5 +1,6 @@
 package edu.vt.codewaveservice.processor.impl;
 
+import edu.vt.codewaveservice.processor.CriticalProcessor;
 import edu.vt.codewaveservice.processor.ProcessingContext;
 import edu.vt.codewaveservice.processor.Processor;
 import edu.vt.codewaveservice.utils.SystemConstants;
