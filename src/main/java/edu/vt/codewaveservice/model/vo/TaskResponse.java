@@ -9,5 +9,4 @@ public class TaskResponse {
     private String genUrl;
 
     private String genId;
-
 }

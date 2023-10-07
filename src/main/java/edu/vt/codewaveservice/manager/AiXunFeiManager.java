@@ -1,19 +1,41 @@
 package edu.vt.codewaveservice.manager;
 
 import com.alibaba.excel.util.StringUtils;
-import edu.vt.codewaveservice.utils.XunFeiUtil;
+import edu.vt.codewaveservice.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Base64;
 
 @Slf4j
 @Service
 public class AiXunFeiManager {
+
+    public String TextToAudioMultiPart(String text,String bookName) throws IOException {
+        if (!StringUtils.isNotBlank(text)) {
+            return "empty text";
+        }
+
+        String fileName = bookName+ TaskIdUtil.generateTaskID()+ ".txt";
+
+        text = text.replaceAll("\\&[a-zA-Z]{1,10};", "").replaceAll("<[^>]*>", "").replaceAll("[(/>)<]", "").trim();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SystemConstants.TEXT_PATH+fileName))) {
+            writer.write(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        TextToMP3 textToMP3 = new TextToMP3();
+        String outputFilePath = textToMP3.generateMultiPartMp3(SystemConstants.TEXT_PATH+fileName);
+        String s3Url = textToMP3.uploadAndCleanUp(outputFilePath);
+        return s3Url;
+    }
+
+    private String uploadToS3(String localFilePath, String s3FileName) {
+        S3Utils s3Utils = new S3Utils();
+        return s3Utils.uploadFile(localFilePath, s3FileName);
+    }
 
     public String TextToAudio(String text,String fileName) throws IOException {
         if (!StringUtils.isNotBlank(text)) {

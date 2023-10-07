@@ -25,25 +25,25 @@ import java.util.*;
 public class XunFeiUtil {
 
     //讯飞四个注入参数，保存在配置文件，便于复用和避免代码上传gitee后泄漏
-    private static String hostUrl;
+    private static String hostUrl = "https://tts-api.xfyun.cn/v2/tts";
     @Value("${xunfei.hostUrl}")
     public void setHostUrl(String hostUrl) {
         XunFeiUtil.hostUrl = hostUrl;
     }
 
-    private static String appid;
+    private static String appid ="dec60e28";
     @Value("${xunfei.appid}")
     public void setAppid(String appid) {
         XunFeiUtil.appid = appid;
     }
 
-    private static String apiSecret;
+    private static String apiSecret="MzMzMGFkYjI2MzAyMjk2MjUzMTRhOTRl";
     @Value("${xunfei.apiSecret}")
     public void setApiSecret(String apiSecret) {
         XunFeiUtil.apiSecret = apiSecret;
     }
 
-    private static String apiKey;
+    private static String apiKey="b492175e9919700929dca6b5e0f7dace";
     @Value("${xunfei.apiKey}")
     public void setApiKey(String apiKey) {
         XunFeiUtil.apiKey = apiKey;
@@ -90,7 +90,7 @@ public class XunFeiUtil {
                 business.addProperty("aue", "lame");
                 business.addProperty("sfl", 1);
                 business.addProperty("tte", "UTF8");//小语种必须使用UNICODE编码
-                business.addProperty("vcn", "xiaoyan");//到控制台-我的应用-语音合成-添加试用或购买发音人，添加后即显示该发音人参数值，若试用未添加的发音人会报错11200
+                business.addProperty("vcn", "x2_engam_ryan");//到控制台-我的应用-语音合成-添加试用或购买发音人，添加后即显示该发音人参数值，若试用未添加的发音人会报错11200
                 business.addProperty("pitch", 50);
                 business.addProperty("speed", 50);
                 //填充data
@@ -113,7 +113,7 @@ public class XunFeiUtil {
             public void onMessage(WebSocket webSocket, String text) {
                 super.onMessage(webSocket, text);
                 //处理返回数据
-                System.out.println("receive=>");
+                System.out.println("receive data=>");
                 ResponseData resp = null;
                 try {
                     resp = json.fromJson(text, ResponseData.class);
@@ -134,7 +134,7 @@ public class XunFeiUtil {
                             String is = base64Concat(list);
                             base64 = is;
                             lock = false;
-                            webSocket.close(1000, "");
+                            webSocket.close(100, "");
                         }
                     }
                 }

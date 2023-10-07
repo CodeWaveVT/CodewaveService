@@ -5,9 +5,15 @@ import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.epub.EpubReader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.jsoup.Jsoup;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 @Slf4j
 public class ConvertUtil {
@@ -27,4 +33,31 @@ public class ConvertUtil {
         }
         return txtContent.toString();
     }
+
+    public static String readPdfContent(MultipartFile file) {
+        try (InputStream in = file.getInputStream()) {
+            PDDocument document = PDDocument.load(in);
+            PDFTextStripper stripper = new PDFTextStripper();
+            String content = stripper.getText(document);
+            document.close();
+            return content;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String readTxtContent(MultipartFile file) throws IOException {
+
+        StringBuilder content = new StringBuilder();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+        }
+        return content.toString();
+    }
+
 }
