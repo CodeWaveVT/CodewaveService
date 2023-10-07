@@ -4,23 +4,22 @@ import edu.vt.codewaveservice.common.BaseResponse;
 import edu.vt.codewaveservice.common.ErrorCode;
 import edu.vt.codewaveservice.common.ResultUtils;
 import edu.vt.codewaveservice.exception.ThrowUtils;
-import edu.vt.codewaveservice.manager.AiXunFeiManager;
 import edu.vt.codewaveservice.manager.RedisLimitManager;
 import edu.vt.codewaveservice.model.dto.GenAudioBookRequest;
 import edu.vt.codewaveservice.model.entity.Task;
 import edu.vt.codewaveservice.model.entity.User;
 import edu.vt.codewaveservice.model.vo.TaskResponse;
 import edu.vt.codewaveservice.model.vo.TaskVo;
-import edu.vt.codewaveservice.processor.ConverterProcessorFactory;
 import edu.vt.codewaveservice.processor.ProcessingContext;
+import edu.vt.codewaveservice.processor.Processor;
+import edu.vt.codewaveservice.processor.ProcessorException;
 import edu.vt.codewaveservice.processor.TextToAudioChain;
+import edu.vt.codewaveservice.processor.impl.CriticalProcessor;
 import edu.vt.codewaveservice.service.TaskService;
 import edu.vt.codewaveservice.service.UserService;
 import edu.vt.codewaveservice.utils.TaskIdUtil;
 import edu.vt.codewaveservice.utils.TempFileManager;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -30,13 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static edu.vt.codewaveservice.utils.ConvertUtil.convertEpubToTxt;
 import static java.lang.Thread.sleep;
 
 @RestController
@@ -55,9 +52,6 @@ public class TaskController {
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
 
-    @Resource
-    private AiXunFeiManager aiXunFeiManager;
-
     @PostMapping("/gen/async")
     public BaseResponse<TaskResponse> genChartByAi(@RequestPart("file") MultipartFile file,
                                                    GenAudioBookRequest genAudioBookRequest, HttpServletRequest httpServletRequest) {
@@ -71,74 +65,79 @@ public class TaskController {
 //         todo
 //        redisLimitManager.doRateLimit("getChartById_"+loginUser.getId());
 
-            // Convert the EPUB file to TXT
-//            String txtContent = null;
-//            try {
-//                txtContent = convertEpubToTxt(file);
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//            //log.info("convert finish "+txtContent);
-//            System.out.println(txtContent);
+        byte[] ebookData;
+        try {
+            ebookData = file.getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading uploaded file", e);
+        }
 
-            Task task = new Task();
-            task.setEbookname(name);
-            task.setId(TaskIdUtil.generateTaskID());
-            task.setBookType(type);
-            task.setStatus("waiting");
-//            task.setEbookTextData(txtContent);
-//            task.setUserId(-1L);
-//            task.setCreateTime(new Date());
-//            task.setUpdateTime(new Date());
-//            task.setIsDelete(0);
+        Task task = new Task.Builder()
+                .withId(TaskIdUtil.generateTaskID())
+                .withEbookname(name)
+                .withBookType(type)
+                .withStatus("waiting")
+                .withUserId(-1L)
+                .withEbookOriginData(ebookData)
+                .build();
+
         boolean saveResult = taskService.save(task);
 
-
         CompletableFuture.runAsync(() -> {
-            Task updateTask = new Task();
-            updateTask.setId(task.getId());
-            updateTask.setStatus("running");
-            System.out.println(updateTask);
+            Task runningTask = new Task.Builder()
+                    .withId(task.getId())
+                    .withStatus("running")
+                    .build();
 
-            boolean b = taskService.updateById(updateTask);
+            boolean b = taskService.updateById(runningTask);
 
             if (!b) {
-                handleChartUpdateError(task.getId(), "update task running status failed");
+                handleUpdateError(task.getId(), "update task running status failed");
                 return;
             }
 
             String result = "generated url";
             TextToAudioChain chain = new TextToAudioChain();
             ProcessingContext context = new ProcessingContext();
-            context.setFile(file);
+            context.setFile(task.getEbookOriginData());
+            context.setFileType(task.getBookType());
+//            context.setFile(file);
             context.setTempFileManager(new TempFileManager());
             String s3Url = null;
+
             try {
-                String fileType = new ConverterProcessorFactory().getFileExtension(context.getFile().getOriginalFilename());
-                System.out.println(fileType);
                 s3Url = chain.process(context);
+            } catch (ProcessorException pe) {
+                Processor failingProcessor = pe.getFailedProcessor();
+                if (failingProcessor.getClass().isAnnotationPresent(CriticalProcessor.class)) {
+                    String errorMessage = "Error in processor: " + failingProcessor.getClass().getSimpleName();
+                    handleUpdateError(task.getId(), errorMessage);
+                }
+                throw new RuntimeException(pe);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+
+
             result = s3Url;
             System.out.println("generate result :" + result);
 
             if (result.length() == 0) {
-                handleChartUpdateError(task.getId(), "AI gen error");
+                handleUpdateError(task.getId(), "AI gen error");
                 return;
             }
 
-            Task finishTask = new Task();
-            finishTask.setId(task.getId());
-            finishTask.setStatus("success");
-            finishTask.setGenAudioUrl(result);
-
+            Task finishTask = new Task.Builder()
+                    .withId(task.getId())
+                    .withStatus("success")
+                    .withGenAudioUrl(result)
+                    .build();
             boolean updateResult = taskService.updateById(finishTask);
 
-            System.out.println("update result :" );
+            System.out.println("update result :"+updateResult);
 
             if (!updateResult) {
-                handleChartUpdateError(task.getId(), "update task finish status failed");
+                handleUpdateError(task.getId(), "update task finish status failed");
             }
         }, threadPoolExecutor);
 
@@ -165,7 +164,7 @@ public class TaskController {
         return ResultUtils.success(otherTasks);
     }
 
-    private void handleChartUpdateError(String taskId, String execMessage) {
+    private void handleUpdateError(String taskId, String execMessage) {
         Task updateTask = new Task();
         updateTask.setId(taskId);
         updateTask.setStatus("failed");

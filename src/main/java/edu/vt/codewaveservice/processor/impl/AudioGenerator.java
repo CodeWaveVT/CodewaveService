@@ -4,6 +4,7 @@ import edu.vt.codewaveservice.processor.ProcessingContext;
 import edu.vt.codewaveservice.processor.Processor;
 import edu.vt.codewaveservice.utils.SystemConstants;
 import edu.vt.codewaveservice.utils.XunFeiUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,7 +13,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-
+@CriticalProcessor(retryCount = 2)
+@Slf4j
 public class AudioGenerator implements Processor {
     @Override
     public void process(ProcessingContext context) {
@@ -52,7 +54,7 @@ public class AudioGenerator implements Processor {
         try {
             result = XunFeiUtil.convertText(text);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("IO exception occurred while calling AI service", e);
         }
         byte[] audioByte = Base64.getDecoder().decode(result);
         try (OutputStream outputStream = new FileOutputStream(path)) {

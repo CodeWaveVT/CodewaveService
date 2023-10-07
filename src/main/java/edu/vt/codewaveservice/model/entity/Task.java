@@ -82,4 +82,54 @@ public class Task implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+    public static class Builder {
+        private Task task;
+
+        public Builder() {
+            task = new Task();
+        }
+
+        public Task build() {
+            return task;
+        }
+
+        public Builder withId(String id) {
+            task.setId(id);
+            return this;
+        }
+
+        public Builder withStatus(String status) {
+            task.setStatus(status);
+            return this;
+        }
+
+        public Builder withGenAudioUrl(String url) {
+            task.setGenAudioUrl(url);
+            return this;
+        }
+
+
+        public Builder withEbookname(String ebookname) {
+            task.setEbookname(ebookname);
+            return this;
+        }
+
+        public Builder withBookType(String type) {
+            task.setBookType(type);
+            return this;
+        }
+
+        public Builder withUserId(long l) {
+            task.setUserId(l);
+            return this;
+        }
+
+        public Builder withEbookOriginData(byte[] ebookData) {
+            task.setEbookOriginData(ebookData);
+            return this;
+        }
+    }
+
+
 }

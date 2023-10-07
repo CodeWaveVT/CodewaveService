@@ -11,20 +11,22 @@ public class TextToAudioChain {
     private List<Processor> processors = new ArrayList<>();
 
     public TextToAudioChain() {
-        processors.add(new LoggingProcessorDecorator(new TextPreprocessor()));
-        processors.add(new LoggingProcessorDecorator(new TextFileWriter()));
-        processors.add(new LoggingProcessorDecorator(new TextSplitter()));
-        processors.add(new LoggingProcessorDecorator(new AudioGenerator()));
-        processors.add(new LoggingProcessorDecorator(new AudioMerger()));
-        processors.add(new LoggingProcessorDecorator(new S3Uploader()));
+        addProcessor(new LoggingProcessorDecorator(new TextPreprocessor()));
+        addProcessor(new LoggingProcessorDecorator(new TextFileWriter()));
+        addProcessor(new LoggingProcessorDecorator(new TextSplitter()));
+        addProcessor(new LoggingProcessorDecorator(new AudioGenerator()));
+        addProcessor(new LoggingProcessorDecorator(new AudioMerger()));
+        addProcessor(new LoggingProcessorDecorator(new S3Uploader()));
     }
 
     public String process(ProcessingContext context) throws Exception {
-        String fileType = new ConverterProcessorFactory().getFileExtension(context.getFile().getOriginalFilename());
-        System.out.println(fileType);
+//        String fileType = new ConverterProcessorFactory().getFileExtension(context.getFile().getOriginalFilename());
+//        System.out.println(fileType);
+        String fileType = context.getFileType();
         Processor startingProcessor = new ConverterProcessorFactory().getProcessor(fileType);
         try {
-            new LoggingProcessorDecorator(startingProcessor).process(context);  // process the file first
+            new LoggingProcessorDecorator(startingProcessor).process(context);  //process the file first
+
             for (Processor processor : processors) {
                 processor.process(context);
             }
@@ -33,6 +35,15 @@ public class TextToAudioChain {
         }
 
         return context.getFinalMp3Path();
+    }
+
+    private void addProcessor(Processor processor) {
+        if (processor.getClass().isAnnotationPresent(CriticalProcessor.class)) {
+            int retries = processor.getClass().getAnnotation(CriticalProcessor.class).retryCount();
+            processors.add(new RetryableProcessorDecorator(processor, retries));
+        } else {
+            processors.add(processor);
+        }
     }
 }
 
