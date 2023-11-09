@@ -59,7 +59,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public BaseResponse userRegister(UserRegisterRequest userRegisterRequest, HttpSession session) {
-
+        System.out.println("register session id "+session.getId());
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
@@ -161,11 +161,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public BaseResponse sendValidateCode(String email, HttpSession session) {
+        System.out.println("send session id "+session.getId());
         if (RegexUtils.isEmailInvalid(email)) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR,"wrong email format");
         }
         String code = MailUtils.achieveCode();
         session.setAttribute(email, code);
+        //System.out.println(" ============="+session.getAttribute(email));
         log.info("发送登录验证码send code：{}", code);
 
         try {
@@ -181,6 +183,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public BaseResponse doLogin(UserLoginRequest loginRequest, HttpServletRequest httpServletRequest) {
         String userAccount = loginRequest.getUserAccount();
         String userPassword = loginRequest.getUserPassword();
+
+        System.out.println("userAccount:"+userAccount);
+        System.out.println("userPassword:"+userPassword);
 
         if(StringUtils.isAnyBlank(userAccount,userPassword)){
             return ResultUtils.error(ErrorCode.PARAMS_ERROR.getCode(),"userAccount or userPassword is null");

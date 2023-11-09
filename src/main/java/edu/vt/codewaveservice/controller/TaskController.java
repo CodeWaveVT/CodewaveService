@@ -146,6 +146,14 @@ public class TaskController {
         return ResultUtils.success(response);
     }
 
+    @PostMapping("/list/test/completed")
+    public BaseResponse<List<TaskVo>> getCompletedTaskListTest(HttpServletRequest httpServletRequest) {
+        Long userId = -1L;
+        Map<String, List<TaskVo>> taskList = taskService.getTaskById(userId);
+        List<TaskVo> successTasks = taskList.get("successTasks");
+        return ResultUtils.success(successTasks);
+    }
+
     @PostMapping("/list/completed")
     public BaseResponse<List<TaskVo>> getCompletedTaskList(HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);

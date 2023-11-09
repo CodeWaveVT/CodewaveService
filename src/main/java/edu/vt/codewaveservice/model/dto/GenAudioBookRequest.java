@@ -10,5 +10,7 @@ public class GenAudioBookRequest implements Serializable {
 
     private String bookType;
 
+    private String bookAuthor;
+
     private static final long serialVersionUID = 1L;
 }
