@@ -129,6 +129,11 @@ public class Task implements Serializable {
             task.setEbookOriginData(ebookData);
             return this;
         }
+
+        public Builder withEbookTextData(String ebookTextData) {
+            task.setEbookTextData(ebookTextData);
+            return this;
+        }
     }
 
 

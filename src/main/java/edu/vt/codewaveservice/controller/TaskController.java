@@ -57,6 +57,7 @@ public class TaskController {
                                                    GenAudioBookRequest genAudioBookRequest, HttpServletRequest httpServletRequest) {
         String name = genAudioBookRequest.getBookName();
         String type = genAudioBookRequest.getBookType();
+        String author = genAudioBookRequest.getBookAuthor();
         ThrowUtils.throwIf(file.isEmpty(),ErrorCode.PARAMS_ERROR,"empty ebook");
         //ThrowUtils.throwIf(StringUtils.isBlank(name), ErrorCode.PARAMS_ERROR, "empty book name");
         //ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
@@ -76,6 +77,7 @@ public class TaskController {
                 .withId(TaskIdUtil.generateTaskID())
                 .withEbookname(name)
                 .withBookType(type)
+                .withEbookTextData(author)
                 .withStatus("waiting")
                 .withUserId(-1L)
                 .withEbookOriginData(ebookData)
@@ -161,6 +163,14 @@ public class TaskController {
         Map<String, List<TaskVo>> taskList = taskService.getTaskById(userId);
         List<TaskVo> successTasks = taskList.get("successTasks");
         return ResultUtils.success(successTasks);
+    }
+
+    @PostMapping("/list/test/processing")
+    public BaseResponse<List<TaskVo>> getProcessingTaskListTest(HttpServletRequest httpServletRequest) {
+        Long userId = -1L;
+        Map<String, List<TaskVo>> taskList = taskService.getTaskById(userId);
+        List<TaskVo> otherTasks = taskList.get("otherTasks");
+        return ResultUtils.success(otherTasks);
     }
 
     @PostMapping("/list/processing")

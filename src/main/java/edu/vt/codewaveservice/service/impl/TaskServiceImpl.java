@@ -42,7 +42,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task>
             taskVo.setTaskId(String.valueOf(task.getId()));
             taskVo.setBookName(task.getEbookname());
             taskVo.setBookUrl(task.getGenAudioUrl());
-            taskVo.setAuthor("unknown");
+            taskVo.setAuthor(task.getEbookTextData());
             taskVo.setCreateTime(task.getCreateTime());
             taskVo.setStatus(task.getStatus());
 
