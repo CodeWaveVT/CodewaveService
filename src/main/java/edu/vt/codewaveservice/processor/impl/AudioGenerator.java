@@ -3,6 +3,7 @@ package edu.vt.codewaveservice.processor.impl;
 import edu.vt.codewaveservice.processor.CriticalProcessor;
 import edu.vt.codewaveservice.processor.ProcessingContext;
 import edu.vt.codewaveservice.processor.Processor;
+import edu.vt.codewaveservice.utils.OpenaiUtil;
 import edu.vt.codewaveservice.utils.SystemConstants;
 import edu.vt.codewaveservice.utils.XunFeiUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,8 @@ public class AudioGenerator implements Processor {
         String path = SystemConstants.TTS_PATH + taskName;
         String result = "";
         try {
-            result = XunFeiUtil.convertText(text);
+           // result = XunFeiUtil.convertText(text);
+            result = OpenaiUtil.textToSpeech(text);
         } catch (Exception e) {
             log.debug("IO exception occurred while calling AI service", e);
         }
