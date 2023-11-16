@@ -3,6 +3,8 @@ package edu.vt.codewaveservice.processor.impl;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.io.Files;
+import edu.vt.codewaveservice.common.SpringContext;
+import edu.vt.codewaveservice.manager.TTSModels.TTSModelProperties;
 import edu.vt.codewaveservice.processor.ProcessingContext;
 import edu.vt.codewaveservice.processor.Processor;
 import edu.vt.codewaveservice.utils.SystemConstants;
@@ -18,12 +20,16 @@ import static edu.vt.codewaveservice.utils.SystemConstants.WORDS_PER_FILE;
 public class TextSplitter implements Processor {
     @Override
     public void process(ProcessingContext context) {
+        TTSModelProperties properties = SpringContext.getBean(TTSModelProperties.class);
+        TTSModelProperties.ModelDetails modelDetails = properties.getModels().get(context.getModelType());
+        int maxInputLength = modelDetails != null ? modelDetails.getMaxInputLength() : WORDS_PER_FILE; // 保底机制
+
         String filePath = SystemConstants.TEXT_PATH + context.getFileName();
-        List<String> subTexts = splitTextFile(filePath);
+        List<String> subTexts = splitTextFile(filePath, maxInputLength);
         context.setSubTexts(subTexts);
     }
 
-    public List<String> splitTextFile(String filePath) {
+    public List<String> splitTextFile(String filePath,int maxInputLength){
         List<String> subTexts = new ArrayList<>();
         try {
             String content = Files.asCharSource(new File(filePath), Charsets.UTF_8).read();
@@ -35,7 +41,7 @@ public class TextSplitter implements Processor {
             while (iterator.hasNext()) {
                 sb.append(iterator.next()).append(" ");
                 wordCount++;
-                if (wordCount >= WORDS_PER_FILE) {
+                if (wordCount >= maxInputLength) {
                     subTexts.add(sb.toString().trim());
                     sb = new StringBuilder();
                     wordCount = 0;

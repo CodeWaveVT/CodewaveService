@@ -80,6 +80,8 @@ public class Task implements Serializable {
      */
     private byte[] genAduioData;
 
+    private String modelType;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
@@ -132,6 +134,11 @@ public class Task implements Serializable {
 
         public Builder withEbookTextData(String ebookTextData) {
             task.setEbookTextData(ebookTextData);
+            return this;
+        }
+
+        public Builder withModelType(String modelType) {
+            task.setModelType(modelType);
             return this;
         }
     }

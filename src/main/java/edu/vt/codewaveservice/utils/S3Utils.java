@@ -18,8 +18,8 @@ import java.time.Instant;
 public class S3Utils {
 
     private static final String BUCKET_NAME = "codewaveaudio";
-    private static final String ACCESS_KEY = ""; //
-    private static final String SECRET_KEY = "";
+    private static final String ACCESS_KEY = ""; // 替换为你的AK
+    private static final String SECRET_KEY = ""; // 替换为你的SK
     private static final Region REGION = Region.US_EAST_1;
     private S3Client s3Client;
 

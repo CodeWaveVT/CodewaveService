@@ -12,8 +12,8 @@ import edu.vt.codewaveservice.model.dto.UserRegisterRequest;
 import edu.vt.codewaveservice.model.entity.User;
 import edu.vt.codewaveservice.service.UserService;
 import edu.vt.codewaveservice.mapper.UserMapper;
-import edu.vt.codewaveservice.utils.MailUtils;
-import edu.vt.codewaveservice.utils.RegexUtils;
+import edu.vt.codewaveservice.utils.mail.MailUtils;
+import edu.vt.codewaveservice.utils.mail.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import static edu.vt.codewaveservice.common.ErrorCode.USER_EXIST_ERROR;
 import static edu.vt.codewaveservice.utils.SystemConstants.USER_LOGIN_STATE;
 import static edu.vt.codewaveservice.utils.SystemConstants.USER_PASSWORD_SALT;
 
@@ -43,7 +42,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public User getLoginUser(HttpServletRequest request) {
-        Object userObj = request.getSession().getAttribute("user_login");
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         if (currentUser == null || currentUser.getId() == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);

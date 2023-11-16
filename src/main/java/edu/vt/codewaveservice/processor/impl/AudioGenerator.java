@@ -1,11 +1,12 @@
 package edu.vt.codewaveservice.processor.impl;
 
+import edu.vt.codewaveservice.common.SpringContext;
+import edu.vt.codewaveservice.manager.TTSModels.TTSModel;
+import edu.vt.codewaveservice.manager.TTSModels.TTSModelFactory;
 import edu.vt.codewaveservice.processor.CriticalProcessor;
 import edu.vt.codewaveservice.processor.ProcessingContext;
 import edu.vt.codewaveservice.processor.Processor;
-import edu.vt.codewaveservice.utils.OpenaiUtil;
 import edu.vt.codewaveservice.utils.SystemConstants;
-import edu.vt.codewaveservice.utils.XunFeiUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -18,6 +19,13 @@ import java.util.List;
 @CriticalProcessor(retryCount = 2)
 @Slf4j
 public class AudioGenerator implements Processor {
+
+    private TTSModelFactory ttsModelFactory;
+
+    public AudioGenerator() {
+        this.ttsModelFactory = SpringContext.getBean(TTSModelFactory.class);
+    }
+
     @Override
     public void process(ProcessingContext context) {
         List<File> mp3Files = new ArrayList<>();
@@ -29,7 +37,7 @@ public class AudioGenerator implements Processor {
             String taskName = baseName + String.format("part%s.mp3", i);
 
             try {
-                textToAudio(subText, taskName);
+                textToAudio(subText, taskName,context);
                 String path = SystemConstants.TTS_PATH + taskName;
                 mp3Files.add(context.getTempFileManager().createTempFile(path));
             } catch (IOException e) {
@@ -50,12 +58,15 @@ public class AudioGenerator implements Processor {
         }
     }
 
-    public void textToAudio(String text, String taskName) throws IOException {
+    public void textToAudio(String text, String taskName,ProcessingContext context) throws IOException {
         String path = SystemConstants.TTS_PATH + taskName;
         String result = "";
+        TTSModel ttsModel = ttsModelFactory.getModel(context.getModelType());
+        //System.out.printf("ttsModel: %s\n", ttsModel);
         try {
            // result = XunFeiUtil.convertText(text);
-            result = OpenaiUtil.textToSpeech(text);
+           // result = OpenaiUtil.textToSpeech(text);
+            result = ttsModel.generateAudio(text);
         } catch (Exception e) {
             log.debug("IO exception occurred while calling AI service", e);
         }

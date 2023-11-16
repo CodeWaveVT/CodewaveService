@@ -1,13 +1,25 @@
-package edu.vt.codewaveservice.utils;
-import java.io.*;
+package edu.vt.codewaveservice.manager.TTSModels;
+
+import com.google.gson.JsonObject;
+import edu.vt.codewaveservice.manager.TTSModels.TTSModel;
+import org.springframework.stereotype.Component;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Base64;
-import com.google.gson.JsonObject;
 
-public class OpenaiUtil {
+@Component("openai")
+public class OpenaiModel implements TTSModel {
+    @Override
+    public String generateAudio(String text) throws IOException {
+        return textToSpeech(text);
+    }
 
-    private static final String OPENAI_URL = "https://api.openai.com/v1/audio/speech";
+    private static final String OPENAI_URL = "";
     private static final String API_KEY = "";
 
     public static String textToSpeech(String text) {
@@ -44,9 +56,4 @@ public class OpenaiUtil {
             return null;
         }
     }
-
-//    public static void main(String[] args) {
-//        String base64EncodedMP3 = textToSpeech("The quick brown fox jumped over the lazy dog.");
-//        System.out.println(base64EncodedMP3);
-//    }
 }
