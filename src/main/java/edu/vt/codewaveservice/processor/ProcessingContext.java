@@ -18,4 +18,5 @@ public class ProcessingContext {
     private String finalMp3Path;
     private TempFileManager tempFileManager;
     private String fileType;
+    private String modelType;
 }

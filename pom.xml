@@ -184,7 +184,19 @@
 
     <build>
         <plugins>
-
+            <plugin>
+                <!-- Spring Boot Maven 插件 -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.7.16-SNAPSHOT</version> <!-- 请确保这是您正在使用的 Spring Boot 版本 -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal> <!-- 这个目标会重新打包您的应用程序，生成一个可执行的 JAR 文件 -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <repositories>

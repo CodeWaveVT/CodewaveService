@@ -29,6 +29,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task>
     @Override
     public Map<String, List<TaskVo>> getTaskById(Long userId) {
         QueryWrapper<Task> queryWrapper = new QueryWrapper<>();
+        queryWrapper.orderByDesc("createTime");
         queryWrapper.eq("userId", userId);
 
         List<Task> tasks = taskMapper.selectList(queryWrapper);
@@ -40,8 +41,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task>
             TaskVo taskVo = new TaskVo();
             taskVo.setTaskId(String.valueOf(task.getId()));
             taskVo.setBookName(task.getEbookname());
-
-            taskVo.setAuthor("unknown");
+            taskVo.setBookUrl(task.getGenAudioUrl());
+            taskVo.setAuthor(task.getEbookTextData());
             taskVo.setCreateTime(task.getCreateTime());
             taskVo.setStatus(task.getStatus());
 

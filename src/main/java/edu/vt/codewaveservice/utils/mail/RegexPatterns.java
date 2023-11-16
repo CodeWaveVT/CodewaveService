@@ -1,4 +1,4 @@
-package edu.vt.codewaveservice.utils;
+package edu.vt.codewaveservice.utils.mail;
 
 
 public abstract class RegexPatterns {

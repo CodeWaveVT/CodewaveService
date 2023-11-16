@@ -1,3 +1,8 @@
+logging:
+  level:
+    root: INFO  # 设置全局日志级别
+    org.springframework.web: WARN  # 例如，将Spring Web的日志级别设置为WARN
+#    n.siegmann.epublib.epub.ResourcesLoader: WARN
 
 spring:
   application:
@@ -20,11 +25,10 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/codewavedb
-#    url: 6b7fcf0bb568.c.methodot.com:30546/codewavedb
     username: root
     password: root
-  # Redis ??
-  # todo ????????????
+
+
   servlet:
     multipart:
       # ????
@@ -60,6 +64,22 @@ mybatis-plus:
       logic-delete-value: 1 # ?????????? 1?
       logic-not-delete-value: 0 # ?????????? 0?
 
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: beans,health,info
+
+audio:
+  models:
+    openai:
+      concurrency: 10
+      maxInputLength: 5000
+    xunfei:
+      concurrency: 5
+      maxInputLength: 20
 
 
 

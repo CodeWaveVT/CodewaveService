@@ -12,6 +12,8 @@ public class TaskVo {
 
     private String author;
 
+    private String bookUrl;
+
     private Date createTime;
 
     private String status;

@@ -12,8 +12,8 @@ import edu.vt.codewaveservice.model.dto.UserRegisterRequest;
 import edu.vt.codewaveservice.model.entity.User;
 import edu.vt.codewaveservice.service.UserService;
 import edu.vt.codewaveservice.mapper.UserMapper;
-import edu.vt.codewaveservice.utils.MailUtils;
-import edu.vt.codewaveservice.utils.RegexUtils;
+import edu.vt.codewaveservice.utils.mail.MailUtils;
+import edu.vt.codewaveservice.utils.mail.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import static edu.vt.codewaveservice.common.ErrorCode.USER_EXIST_ERROR;
 import static edu.vt.codewaveservice.utils.SystemConstants.USER_LOGIN_STATE;
 import static edu.vt.codewaveservice.utils.SystemConstants.USER_PASSWORD_SALT;
 
@@ -43,7 +42,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public User getLoginUser(HttpServletRequest request) {
-        Object userObj = request.getSession().getAttribute("user_login");
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         if (currentUser == null || currentUser.getId() == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
@@ -59,7 +58,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public BaseResponse userRegister(UserRegisterRequest userRegisterRequest, HttpSession session) {
-
+        System.out.println("register session id "+session.getId());
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
@@ -161,11 +160,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public BaseResponse sendValidateCode(String email, HttpSession session) {
+        System.out.println("send session id "+session.getId());
         if (RegexUtils.isEmailInvalid(email)) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR,"wrong email format");
         }
         String code = MailUtils.achieveCode();
         session.setAttribute(email, code);
+        //System.out.println(" ============="+session.getAttribute(email));
         log.info("发送登录验证码send code：{}", code);
 
         try {
@@ -181,6 +182,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public BaseResponse doLogin(UserLoginRequest loginRequest, HttpServletRequest httpServletRequest) {
         String userAccount = loginRequest.getUserAccount();
         String userPassword = loginRequest.getUserPassword();
+
+        System.out.println("userAccount:"+userAccount);
+        System.out.println("userPassword:"+userPassword);
 
         if(StringUtils.isAnyBlank(userAccount,userPassword)){
             return ResultUtils.error(ErrorCode.PARAMS_ERROR.getCode(),"userAccount or userPassword is null");

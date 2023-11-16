@@ -1,4 +1,4 @@
-package edu.vt.codewaveservice.utils;
+package edu.vt.codewaveservice.utils.mail;
 
 import cn.hutool.core.util.StrUtil;
 

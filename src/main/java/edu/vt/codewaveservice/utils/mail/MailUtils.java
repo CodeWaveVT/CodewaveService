@@ -1,4 +1,4 @@
-package edu.vt.codewaveservice.utils;
+package edu.vt.codewaveservice.utils.mail;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;

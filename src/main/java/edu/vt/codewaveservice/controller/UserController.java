@@ -1,24 +1,16 @@
 package edu.vt.codewaveservice.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-
 import edu.vt.codewaveservice.common.BaseResponse;
-import edu.vt.codewaveservice.common.ErrorCode;
-import edu.vt.codewaveservice.common.ResultUtils;
 import edu.vt.codewaveservice.model.dto.UserLoginRequest;
 import edu.vt.codewaveservice.model.dto.UserRegisterRequest;
 import edu.vt.codewaveservice.service.UserService;
-import edu.vt.codewaveservice.utils.MailUtils;
-import edu.vt.codewaveservice.utils.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.List;
 
 @RestController
 @RequestMapping("/user")

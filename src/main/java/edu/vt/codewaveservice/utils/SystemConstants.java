@@ -9,5 +9,5 @@ public class SystemConstants {
     public static final String TEXT_PATH = "src/main/resources/text/";
     public static final String TTS_PATH = "src/main/resources/tts/";
 
-    public static final int WORDS_PER_FILE = 50;
+    public static final int WORDS_PER_FILE = 5000;
 }
