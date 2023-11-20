@@ -27,10 +27,6 @@ public class TaskProcessingConfig {
 
     @Bean(name = "executorServices")
     public Map<String, ExecutorService> executorServices() {
-//        Map<String, ExecutorService> executorServices = new HashMap<>();
-//        executorServices.put("openai", Executors.newFixedThreadPool(10));
-//        executorServices.put("xunfei", Executors.newSingleThreadExecutor());
-        //executorServices.forEach((key, value) -> log.info("Key E: {}, ExecutorService: {}", key, value));
         Map<String, ExecutorService> executorServices = new HashMap<>();
         ttsModelProperties.getModels().forEach((modelName, modelDetails) -> {
             ExecutorService executorService = Executors.newFixedThreadPool(modelDetails.getConcurrency());
@@ -47,8 +43,6 @@ public class TaskProcessingConfig {
         for(String modelName : models.keySet()) {
             strategies.put(modelName, new ConcurrentModelStrategy(taskService));
         }
-//        strategies.put("openai", new ConcurrentModelStrategy(taskService));
-//        strategies.put("xunfei", new ConcurrentModelStrategy(taskService));
         strategies.forEach((key, value) -> log.info("Key S: {}, Strategy: {}", key, value.getClass().getSimpleName()));
         return strategies;
     }

@@ -12,6 +12,7 @@ import edu.vt.codewaveservice.model.entity.Task;
 import edu.vt.codewaveservice.model.entity.User;
 import edu.vt.codewaveservice.model.vo.TaskResponse;
 import edu.vt.codewaveservice.model.vo.TaskVo;
+import edu.vt.codewaveservice.mq.TaskPublisher;
 import edu.vt.codewaveservice.processor.ProcessingContext;
 import edu.vt.codewaveservice.processor.Processor;
 import edu.vt.codewaveservice.processor.ProcessorException;
@@ -52,6 +53,9 @@ public class TaskController {
 
     @Autowired
     private TaskDispatcher  taskDispatcher;
+
+    @Autowired
+    private TaskPublisher taskPublisher;
 
     @PostMapping("/gen/async")
     public BaseResponse<TaskResponse> genAudioByAi(@RequestPart("file") MultipartFile file,
@@ -137,14 +141,15 @@ public class TaskController {
                 .withBookType(type)
                 .withEbookTextData(author)
                 .withStatus("waiting")
-                .withUserId(-2L)
+                .withUserId(-3L)
                 .withModelType(modelType)
                 .withEbookOriginData(ebookData)
                 .build();
 
         taskService.save(task);
 
-        taskDispatcher.dispatch(task);
+        //taskDispatcher.dispatch(task);
+        taskPublisher.publish(task);
 
         TaskResponse response = new TaskResponse();
         response.setGenId(task.getId());
@@ -153,7 +158,7 @@ public class TaskController {
 
     @PostMapping("/list/test/completed")
     public BaseResponse<List<TaskVo>> getCompletedTaskListTest(HttpServletRequest httpServletRequest) {
-        Long userId = -2L;
+        Long userId = -3L;
         Map<String, List<TaskVo>> taskList = taskService.getTaskById(userId);
         List<TaskVo> successTasks = taskList.get("successTasks");
         return ResultUtils.success(successTasks);
@@ -163,7 +168,7 @@ public class TaskController {
 
     @PostMapping("/list/test/processing")
     public BaseResponse<List<TaskVo>> getProcessingTaskListTest(HttpServletRequest httpServletRequest) {
-        Long userId = -2L;
+        Long userId = -3L;
         Map<String, List<TaskVo>> taskList = taskService.getTaskById(userId);
         List<TaskVo> otherTasks = taskList.get("otherTasks");
         return ResultUtils.success(otherTasks);
