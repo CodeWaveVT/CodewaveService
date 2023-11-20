@@ -113,6 +113,13 @@ public class TaskController {
         return ResultUtils.success(successTasks);
     }
 
+    @PostMapping("/delete/completed")
+    public BaseResponse<String> deleteCompletedTask(HttpServletRequest httpServletRequest, String taskId) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        Long userId = loginUser.getId();
+        return taskService.deleteTaskById(userId, taskId);
+    }
+
     @PostMapping("/gen/test/async")
     public BaseResponse<TaskResponse> genAudioByAiTest(@RequestPart("file") MultipartFile file,
                                                        GenAudioBookRequest genAudioBookRequest, HttpServletRequest httpServletRequest) {

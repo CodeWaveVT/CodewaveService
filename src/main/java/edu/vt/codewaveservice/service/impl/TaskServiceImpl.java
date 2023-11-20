@@ -2,6 +2,9 @@ package edu.vt.codewaveservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.vt.codewaveservice.common.BaseResponse;
+import edu.vt.codewaveservice.common.ErrorCode;
+import edu.vt.codewaveservice.common.ResultUtils;
 import edu.vt.codewaveservice.model.entity.Task;
 import edu.vt.codewaveservice.model.vo.TaskVo;
 import edu.vt.codewaveservice.service.TaskService;
@@ -59,6 +62,20 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task>
 
         return resultMap;
     }
+
+    @Override
+    public BaseResponse deleteTaskById(Long userId, String taskId) {
+
+        QueryWrapper<Task> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", userId);
+        queryWrapper.eq("id", taskId);
+        int delete = taskMapper.delete(queryWrapper);
+        if (delete > 0) {
+            return ResultUtils.success("delete success");
+        }
+        return ResultUtils.error(ErrorCode.OPERATION_ERROR, "delete failed");
+    }
+
 }
 
 
