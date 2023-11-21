@@ -3,6 +3,7 @@ package edu.vt.codewaveservice.controller;
 import edu.vt.codewaveservice.common.BaseResponse;
 import edu.vt.codewaveservice.model.dto.UserLoginRequest;
 import edu.vt.codewaveservice.model.dto.UserRegisterRequest;
+import edu.vt.codewaveservice.model.dto.UserResetRequest;
 import edu.vt.codewaveservice.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -38,4 +39,10 @@ public class UserController {
     public BaseResponse userLogout(HttpServletRequest httpServletRequest){
         return  userService.doLogout(httpServletRequest);
     }
+
+    @PostMapping("/resetPassword")
+    public BaseResponse resetPassword(@RequestBody UserResetRequest userResetRequest, HttpSession session){
+        return userService.forgetPassword(userResetRequest,session);
+    }
+
 }

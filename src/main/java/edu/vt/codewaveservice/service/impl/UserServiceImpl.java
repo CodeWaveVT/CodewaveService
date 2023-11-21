@@ -9,6 +9,7 @@ import edu.vt.codewaveservice.common.ResultUtils;
 import edu.vt.codewaveservice.exception.BusinessException;
 import edu.vt.codewaveservice.model.dto.UserLoginRequest;
 import edu.vt.codewaveservice.model.dto.UserRegisterRequest;
+import edu.vt.codewaveservice.model.dto.UserResetRequest;
 import edu.vt.codewaveservice.model.entity.User;
 import edu.vt.codewaveservice.service.UserService;
 import edu.vt.codewaveservice.mapper.UserMapper;
@@ -107,11 +108,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public BaseResponse forgetPassword(UserRegisterRequest userRegisterRequest, HttpSession session) {
-        String userAccount = userRegisterRequest.getUserAccount();
-        String userPassword = userRegisterRequest.getUserPassword();
-        String checkPassword = userRegisterRequest.getCheckPassword();
-        String validateCode = userRegisterRequest.getValidateCode();
+    public BaseResponse forgetPassword(UserResetRequest userResetRequest, HttpSession session) {
+        String userAccount = userResetRequest.getUserAccount();
+        String userPassword = userResetRequest.getUserPassword();
+        String checkPassword = userResetRequest.getCheckPassword();
+        String validateCode = userResetRequest.getValidateCode();
 
         if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword,validateCode)){
             log.info("userAccount:{} userPassword:{} checkPassword:{} validateCode:{} is null", userAccount,userPassword,checkPassword,validateCode);
