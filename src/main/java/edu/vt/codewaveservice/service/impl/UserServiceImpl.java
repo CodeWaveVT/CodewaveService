@@ -59,6 +59,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public BaseResponse userRegister(UserRegisterRequest userRegisterRequest, HttpSession session) {
+        if(session==null){
+            return ResultUtils.error(ErrorCode.OPERATION_ERROR,"session is null");
+        }
         System.out.println("register session id "+session.getId());
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
@@ -161,7 +164,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public BaseResponse sendValidateCode(String email, HttpSession session) {
-        System.out.println("send session id "+session.getId());
+        //System.out.println("send session id "+session.getId());
         if (RegexUtils.isEmailInvalid(email)) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR,"wrong email format");
         }
