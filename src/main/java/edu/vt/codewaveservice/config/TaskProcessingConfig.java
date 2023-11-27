@@ -45,7 +45,11 @@ public class TaskProcessingConfig {
         Map<String, TaskProcessingStrategy> strategies = new HashMap<>();
         Map<String, TTSModelProperties.ModelDetails> models = ttsModelProperties.getModels();
         for(String modelName : models.keySet()) {
-            strategies.put(modelName, new ConcurrentModelStrategy(taskService));
+            if(modelName.contains("yash")){
+                strategies.put(modelName, new BlockingModelStrategy(taskService));
+            }else{
+                strategies.put(modelName, new ConcurrentModelStrategy(taskService));
+            }
         }
 //        strategies.put("openai", new ConcurrentModelStrategy(taskService));
 //        strategies.put("xunfei", new ConcurrentModelStrategy(taskService));
