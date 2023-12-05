@@ -1,5 +1,6 @@
 package edu.vt.codewaveservice.service;
 
+import edu.vt.codewaveservice.common.BaseResponse;
 import edu.vt.codewaveservice.model.entity.Task;
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.vt.codewaveservice.model.vo.TaskVo;
@@ -16,4 +17,5 @@ public interface TaskService extends IService<Task> {
 
     Map<String, List<TaskVo>> getTaskById(Long userId);
 
+    BaseResponse deleteTaskById(Long userId, String taskId);
 }

@@ -1,5 +1,6 @@
 package edu.vt.codewaveservice.config;
 
+import edu.vt.codewaveservice.common.DistributedLock;
 import lombok.Data;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -28,6 +29,7 @@ public class RedissionConfig {
                 .setDatabase(database)
                 .setAddress("redis://" + host + ":" + port);
         RedissonClient redisson = Redisson.create(config);
+        DistributedLock.setRedissonClient(redisson);
         return redisson;
     }
 }

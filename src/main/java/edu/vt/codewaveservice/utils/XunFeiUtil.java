@@ -20,11 +20,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 //静态参数注入，必须增加@Component注解
-@Component
+
 @Slf4j
 public class XunFeiUtil {
 
-    //讯飞四个注入参数，保存在配置文件，便于复用和避免代码上传gitee后泄漏
+
     private static String hostUrl = "https://tts-api.xfyun.cn/v2/tts";
     @Value("${xunfei.hostUrl}")
     public void setHostUrl(String hostUrl) {

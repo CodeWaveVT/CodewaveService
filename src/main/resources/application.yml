@@ -57,7 +57,7 @@ server:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       logic-delete-field: isDelete # ????????????
@@ -80,6 +80,21 @@ audio:
     xunfei:
       concurrency: 5
       maxInputLength: 20
+    yash_Scoop:
+      concurrency: 1
+      maxInputLength: 500000
+    yash_Doofenshmirtz:
+      concurrency: 1
+      maxInputLength: 500000
+    yash_Vader:
+      concurrency: 1
+      maxInputLength: 500000
+    yash_Gollum:
+      concurrency: 1
+      maxInputLength: 500000
+    yash_Cowboy:
+      concurrency: 1
+      maxInputLength: 500000
 
 
 
