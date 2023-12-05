@@ -13,6 +13,7 @@ import edu.vt.codewaveservice.model.entity.Task;
 import edu.vt.codewaveservice.model.entity.User;
 import edu.vt.codewaveservice.model.vo.TaskResponse;
 import edu.vt.codewaveservice.model.vo.TaskVo;
+import edu.vt.codewaveservice.mq.TaskPublisher;
 import edu.vt.codewaveservice.processor.*;
 import edu.vt.codewaveservice.service.TaskService;
 import edu.vt.codewaveservice.service.UserService;
@@ -50,9 +51,11 @@ public class TaskController {
     @Resource
     private TaskService taskService;
 
-
     @Autowired
     private TaskDispatcher  taskDispatcher;
+
+    @Autowired
+    private TaskPublisher taskPublisher;
 
     @PostMapping("/gen/async")
     public BaseResponse<TaskResponse> genAudioByAi(@RequestPart("file") MultipartFile file,
@@ -69,11 +72,16 @@ public class TaskController {
 
         redisLimitManager.doRateLimit("getAudioById_"+loginUser.getId());
 
-        if (modelType.contains("yash")) {
-            boolean isLocked = DistributedLock.tryLock(DistributedLock.extractLockName(modelType));
-            if (!isLocked) {
-                return ResultUtils.error(ErrorCode.TOO_MANY_REQUEST,"Another request is in progress for yash's model, please try again later");
-            }
+//        if (modelType.contains("yash")) {
+//            boolean isLocked = DistributedLock.tryLock(DistributedLock.extractLockName(modelType));
+//            if (!isLocked) {
+//                return ResultUtils.error(ErrorCode.TOO_MANY_REQUEST,"Another request is in progress for yash's model, please try again later");
+//            }
+//        }
+        int queueSize = taskPublisher.getQueueSize(modelType);
+        log.info("queue size: " + queueSize);
+        if(queueSize>0){
+            return ResultUtils.error(ErrorCode.TOO_MANY_REQUEST,"Another request is in progress, please try again later");
         }
 
         byte[] ebookData;
@@ -96,8 +104,8 @@ public class TaskController {
 
         taskService.save(task);
 
-        taskDispatcher.dispatch(task);
-
+        //taskDispatcher.dispatch(task);
+        taskPublisher.publish(task);
         TaskResponse response = new TaskResponse();
         response.setGenId(task.getId());
         return ResultUtils.success(response);
@@ -216,7 +224,5 @@ public class TaskController {
         List<TaskVo> otherTasks = taskList.get("otherTasks");
         return ResultUtils.success(otherTasks);
     }
-
-
 
 }

@@ -13,6 +13,12 @@ import java.nio.charset.StandardCharsets;
 public class YashUtil {
 
     public static String getAudio(String text,String fileName,String modelType){
+//        try{
+//            Thread.sleep(60000);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        return "https://pub-c2333b24d1fd411281061ef45185b82e.r2.dev/test_Through_the_First_Antarctic_Night_1_audiobook_0.wav";
         String audioUrl = "";
         try {
             audioUrl = sendGetRequest(text,fileName,modelType);
@@ -26,31 +32,12 @@ public class YashUtil {
         return input != null ? input.substring(input.lastIndexOf("_") + 1) : "";
     }
 
-
-    public static String sendPostRequest(String text) throws Exception {
-        String url = "https://8eab-108-28-18-239.ngrok-free.app/v1/audio/tts/";
-        String params = String.format("text=%s&audiobook_name=%s&language=en&voice_name=Snoop&preset=fast",
-                URLEncoder.encode(text, StandardCharsets.UTF_8),
-                URLEncoder.encode(text, StandardCharsets.UTF_8));
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("accept", "application/json")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(params))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        return response.body();
-    }
-
     public static String sendGetRequest(String text,String fileName,String modelType) throws Exception {
         String character = extractCharacter(modelType);
         String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8.toString());
         String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString());
         String encodedModeCharacter = URLEncoder.encode(character, StandardCharsets.UTF_8.toString());
-        String url = String.format("https://62d2-108-28-18-239.ngrok-free.app/v1/audio/tts/?text=%s&audiobook_name=%s&language=en&voice_name=%s&preset=fast", encodedText, encodedFileName, encodedModeCharacter);
+        String url = String.format("https://d944-2607-b400-802-8002-4858-8fdc-d426-7263.ngrok-free.app/v1/audio/tts/?text=%s&audiobook_name=%s&language=en&voice_name=%s&preset=fast", encodedText, encodedFileName, encodedModeCharacter);
 
 
         HttpClient client = HttpClient.newHttpClient();

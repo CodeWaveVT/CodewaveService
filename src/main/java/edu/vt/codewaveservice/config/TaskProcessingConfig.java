@@ -33,10 +33,13 @@ public class TaskProcessingConfig {
         //executorServices.forEach((key, value) -> log.info("Key E: {}, ExecutorService: {}", key, value));
         Map<String, ExecutorService> executorServices = new HashMap<>();
         ttsModelProperties.getModels().forEach((modelName, modelDetails) -> {
-            ExecutorService executorService = Executors.newFixedThreadPool(modelDetails.getConcurrency());
-            executorServices.put(modelName, executorService);
-            log.info("Executor service created for model {}: {}", modelName, executorService);
+            if(!modelName.contains("yash")){
+                ExecutorService executorService = Executors.newFixedThreadPool(modelDetails.getConcurrency());
+                executorServices.put(modelName, executorService);
+                log.info("Executor service created for model {}: {}", modelName, executorService);
+            }
         });
+        executorServices.put("yash", Executors.newSingleThreadExecutor());
         return executorServices;
     }
 
@@ -46,7 +49,7 @@ public class TaskProcessingConfig {
         Map<String, TTSModelProperties.ModelDetails> models = ttsModelProperties.getModels();
         for(String modelName : models.keySet()) {
             if(modelName.contains("yash")){
-                strategies.put(modelName, new BlockingModelStrategy(taskService));
+                strategies.put("yash", new BlockingModelStrategy(taskService));
             }else{
                 strategies.put(modelName, new ConcurrentModelStrategy(taskService));
             }
